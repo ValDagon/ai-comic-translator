@@ -1,5 +1,5 @@
 
-[/Users/valentin/Work/ai-comic-translator/tests/fixtures/minimal/page1.jpg]
+[page1.jpg]
 
 -- 1 --
 color: #1: white (fg, bg: #000000 #ffffff)
