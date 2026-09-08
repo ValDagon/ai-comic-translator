@@ -1,0 +1,12 @@
+# DOMAIN comes from the container env (.env).
+# App auth (login/register) is inside the API — no Caddy basic_auth.
+
+{$DOMAIN} {
+	encode gzip
+
+	request_body {
+		max_size 200MB
+	}
+
+	reverse_proxy api:8000
+}

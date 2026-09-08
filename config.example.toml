@@ -1,0 +1,32 @@
+# Шаблон публичных настроек. В репозитории уже есть config.toml —
+# правьте его и коммитьте. Секрет api_key — только в config.local.toml
+# (см. config.local.toml.example) или через OPENROUTER_API_KEY.
+#
+# Приоритет: флаги CLI > config.local.toml > config.toml > env (только api_key).
+
+[openrouter]
+# Не кладите api_key сюда — используйте config.local.toml или export OPENROUTER_API_KEY=...
+model = "x-ai/grok-4.3"
+pages_per_batch = 30
+# Язык для промпта OpenRouter (ru, en, uk, de, …). Не язык MIT.
+target_lang = "ru"
+
+[render]
+# Абсолютный или относительный путь к .ttf / .otf с кириллицей
+font_path = "fonts/IrinaCTT.ttf"
+font_scale = 1.2
+
+[server]
+# Каталог проектов API (input / _clean / out / translations.json)
+data_dir = "data"
+database = "data/app.db"
+# Путь к manga-image-translator (для job extract / full)
+# mit_repo = "./manga-image-translator"
+# host/port — подсказка для uvicorn (см. README); перекрываются COMIC_API_HOST / COMIC_API_PORT
+host = "127.0.0.1"
+port = 8000
+
+[ui]
+# Устарело для режима UI: включение задаёт COMIC_APP_ENV=dev|release
+# (dev → developer UI, release → обычный UI). Поле оставлено для совместимости.
+developer_mode = false

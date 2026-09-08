@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AI Comic Translator{% endblock %}</title>
+  <meta name="description" content="{{ _('meta.description') }}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ _('meta.title') }}">
+  <meta property="og:description" content="{{ _('meta.description') }}">
+  {% set app_settings = request.app.state.settings %}
+  {% if app_settings.public_base_url %}
+  <meta property="og:url" content="{{ app_settings.public_base_url.rstrip('/') }}/app">
+  <meta property="og:image" content="{{ app_settings.public_base_url.rstrip('/') }}/static/brand/hero.png">
+  {% endif %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@600;700;800&family=JetBrains+Mono:wght@500;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/app.css?v=12">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script>window.__i18n = {{ i18n_js | tojson }};</script>
+</head>
+<body class="theme-app">
+  <header class="top">
+    <a href="/" class="brand" title="{{ _('nav.back_home') }}">
+      <img class="brand-mark" src="/static/brand/logo.png" alt="" width="28" height="28">
+      AI Comic Translator
+    </a>
+    <div class="top-right">
+      {% include "partials/locale_switcher.html" %}
+      <nav class="top-nav" aria-label="{{ _('nav.aria_app') }}">
+        <a href="/">{{ _('nav.home') }}</a>
+        <a href="/app">{{ _('nav.projects') }}</a>
+        <a href="/pricing">{{ _('nav.pricing') }}</a>
+        {% if user %}
+        <a href="/account">{{ _('nav.account') }}</a>
+        {% endif %}
+      </nav>
+      {% if user %}
+      <a class="top-meta top-meta-link" href="/account" title="{{ _('nav.account_title') }}">{{ user.email }}</a>
+      <form class="inline-form" method="post" action="/logout">
+        <button type="submit" class="linkish">{{ _('nav.logout') }}</button>
+      </form>
+      {% endif %}
+    </div>
+  </header>
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+  <script src="/static/job-options.js?v=8" defer></script>
+</body>
+</html>

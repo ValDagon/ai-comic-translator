@@ -1,0 +1,70 @@
+services:
+  api:
+    build:
+      context: .
+      args:
+        MIT_COMMIT: ${MIT_COMMIT:-95227a2bb0fd306cd4f0c104d57284026f991b3a}
+    image: comic-translator:local
+    command: ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+    env_file:
+      - .env
+    environment:
+      MIT_REPO: /app/manga-image-translator
+      COMIC_DATA_DIR: /app/data
+      COMIC_DATABASE: /app/data/app.db
+      COMIC_APP_ENV: release
+      COMIC_SESSION_HTTPS_ONLY: "1"
+      COMIC_PROJECT_RETENTION_DAYS: ${COMIC_PROJECT_RETENTION_DAYS:-3}
+    volumes:
+      - comic-data:/app/data
+      - mit-models:/app/manga-image-translator/models
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      args:
+        MIT_COMMIT: ${MIT_COMMIT:-95227a2bb0fd306cd4f0c104d57284026f991b3a}
+    image: comic-translator:local
+    command: ["python", "worker.py"]
+    env_file:
+      - .env
+    environment:
+      MIT_REPO: /app/manga-image-translator
+      COMIC_DATA_DIR: /app/data
+      COMIC_DATABASE: /app/data/app.db
+      COMIC_APP_ENV: release
+      # assert_runtime_secure() requires this in release mode (same check as api).
+      COMIC_SESSION_HTTPS_ONLY: "1"
+    volumes:
+      - comic-data:/app/data
+      - mit-models:/app/manga-image-translator/models
+    restart: unless-stopped
+    # Real jobs run minutes; don't let `docker compose down`/redeploy SIGKILL
+    # a job mid-run (default grace period is 10s). Combined with the
+    # in-worker stale-job watchdog (service.db.recover_stale_running_jobs),
+    # an interrupted job is still recovered on next boot either way.
+    stop_grace_period: 10m
+
+  caddy:
+    image: caddy:2.9-alpine
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - .env
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+
+volumes:
+  comic-data:
+  mit-models:
+  caddy-data:
+  caddy-config:

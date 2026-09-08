@@ -1,0 +1,87 @@
+{% extends "base_app.html" %}
+{% block title %}{{ _('account.title') }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>{{ _('account.heading') }}</h1>
+  <p class="page-sub">{{ _('account.sub') }}</p>
+</header>
+
+<nav class="account-tabs mode-switch" aria-label="{{ _('account.tabs_aria') }}">
+  <a href="/account?tab=profile" class="{% if tab == 'profile' %}is-active{% endif %}">{{ _('account.tab_profile') }}</a>
+  <a href="/account?tab=subscription" class="{% if tab == 'subscription' %}is-active{% endif %}">{{ _('account.tab_subscription') }}</a>
+  <a href="/account?tab=billing" class="{% if tab == 'billing' %}is-active{% endif %}">{{ _('account.tab_billing') }}</a>
+</nav>
+
+{% if notice %}
+<p class="flash ok" role="status">{{ notice }}</p>
+{% endif %}
+{% if error %}
+<p class="flash bad" role="alert">{{ error }}</p>
+{% endif %}
+
+{% if tab == 'profile' %}
+<section class="card" aria-labelledby="email-title">
+  <h2 id="email-title">{{ _('account.email_title') }}</h2>
+  <dl class="account-meta">
+    <div>
+      <dt>{{ _('common.email') }}</dt>
+      <dd>{{ user.email }}</dd>
+    </div>
+    <div>
+      <dt>{{ _('account.sign_in_methods') }}</dt>
+      <dd>
+        {% if providers %}
+          {% for p in providers %}
+            {% if p == 'google' %}{{ _('auth.provider_google') }}{% elif p == 'apple' %}{{ _('auth.provider_apple') }}{% else %}{{ p }}{% endif %}{% if not loop.last %}, {% endif %}
+          {% endfor %}
+        {% else %}
+          {{ _('account.sign_in_methods_none') }}
+        {% endif %}
+      </dd>
+    </div>
+  </dl>
+  <p class="muted">{{ _('account.email_readonly_hint') }}</p>
+</section>
+
+<section class="card danger-zone" aria-labelledby="delete-title">
+  <h2 id="delete-title">{{ _('account.delete_title') }}</h2>
+  <p class="muted">{{ _('account.delete_warn') }}</p>
+  <p class="muted">{{ _('account.delete_email_hint') }}</p>
+  <form
+    method="post"
+    action="/account/delete/request"
+    data-confirm="{{ _('account.delete_confirm_js') }}"
+  >
+    <label class="field">
+      <span>{{ _('account.delete_confirm_label', word=_('account.delete_confirm_word')) }}</span>
+      <input type="text" name="confirm" required autocomplete="off" placeholder="{{ _('account.delete_confirm_word') }}">
+    </label>
+    <div class="row">
+      <button type="submit" class="danger">{{ _('account.delete_send_link') }}</button>
+    </div>
+  </form>
+</section>
+
+{% elif tab == 'subscription' %}
+<section class="card" aria-labelledby="subscription-title">
+  <h2 id="subscription-title">{{ _('account.subscription_title') }}</h2>
+  <dl class="account-meta">
+    <div>
+      <dt>{{ _('account.plan') }}</dt>
+      <dd>{{ user.plan }}</dd>
+    </div>
+    <div>
+      <dt>{{ _('account.status') }}</dt>
+      <dd>{{ user.subscription_status }}</dd>
+    </div>
+  </dl>
+  <p class="muted">{{ _('account.subscription_stub') }}</p>
+</section>
+
+{% elif tab == 'billing' %}
+<section class="card" aria-labelledby="billing-title">
+  <h2 id="billing-title">{{ _('account.billing_title') }}</h2>
+  <p class="muted">{{ _('account.billing_stub') }}</p>
+</section>
+{% endif %}
+{% endblock %}

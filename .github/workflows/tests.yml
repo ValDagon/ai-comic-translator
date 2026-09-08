@@ -1,0 +1,29 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install -r requirements-dev.txt
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-dejavu-core
+      - name: Run tests
+        run: >
+          pytest -m "not network"
+          --cov=extract_parse --cov=translate_request --cov=render
+          --cov=pipeline --cov=config_loader --cov=run_extract
+          --cov=api --cov=service --cov=web
+          --cov-report=term-missing
+          --cov-fail-under=70

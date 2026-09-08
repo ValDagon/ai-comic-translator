@@ -1,0 +1,405 @@
+{% extends "base_app.html" %}
+{% block title %}{{ project.name }} — AI Comic Translator{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="back-link" href="/app">{{ _('project.back') }}</a>
+  <form
+    method="post"
+    action="/projects/{{ project.id | urlquote }}/ui/name"
+    class="project-name-form"
+    aria-label="{{ _('project.name_aria') }}"
+  >
+    <label class="project-name-label" for="project-name">{{ _('project.name_label') }}</label>
+    <div class="project-name-row">
+      <input
+        type="text"
+        id="project-name"
+        name="name"
+        value="{{ project.name }}"
+        required
+        maxlength="200"
+        placeholder="{{ _('project.name_placeholder') }}"
+        autocomplete="off"
+      >
+      <button type="submit" class="ghost">{{ _('common.save') }}</button>
+    </div>
+  </form>
+  {% if name_error %}
+  <p class="flash bad">{{ name_error }}</p>
+  {% endif %}
+  {% if ui_developer_mode %}
+  <p class="page-sub">{{ _('project.folder') }} <code>{{ folder_path }}</code></p>
+  {% endif %}
+</header>
+
+{% if upload_ok %}
+<div class="banner success" role="status">
+  {{ _('project.upload_ok') }}
+</div>
+{% endif %}
+{% if upload_skipped %}
+<div class="banner warn" role="status">
+  {{ _('project.upload_skipped') }}
+</div>
+{% endif %}
+{% if upload_many %}
+<div class="banner warn" role="status">
+  {{ _('project.upload_many') }}
+</div>
+{% endif %}
+{% if upload_error %}
+<div class="banner error" role="alert">
+  {{ upload_error }}
+</div>
+{% endif %}
+
+{% if font_ok %}
+<div class="banner success" role="status">
+  {{ _('project.font_ok', name=font_ok) }}
+</div>
+{% endif %}
+{% if font_error %}
+<div class="banner error" role="alert">
+  {{ font_error }}
+</div>
+{% endif %}
+
+<section class="card" aria-labelledby="upload-title">
+  <h2 id="upload-title">{{ _('project.upload_title') }}</h2>
+  <p class="section-lead">{{ _('project.upload_lead') }}</p>
+  <form
+    method="post"
+    action="/projects/{{ project.id | urlquote }}/ui/upload"
+    enctype="multipart/form-data"
+    class="upload-stack"
+    id="upload-form"
+  >
+    <div class="upload-drop" id="upload-drop">
+      <p class="upload-drop-title">{{ _('project.upload_drop') }}</p>
+      <p class="upload-drop-hint">{{ _('project.upload_drop_hint') }}</p>
+      <input
+        type="file"
+        name="files"
+        id="upload-files"
+        accept=".jpg,.jpeg,.png,.webp,.gif,.zip,image/*"
+        multiple
+        required
+      >
+    </div>
+    <div class="upload-actions">
+      <button type="submit" class="primary">{{ _('project.upload_submit') }}</button>
+      <span class="file-chosen" id="upload-chosen" aria-live="polite"></span>
+    </div>
+  </form>
+</section>
+
+<section class="card" aria-labelledby="font-title">
+  <h2 id="font-title">{{ _('project.font_title') }}</h2>
+  <p class="section-lead">
+    {% if project_font %}
+    {{ _('project.font_current') }}<strong>{{ project_font.display_name }}</strong>
+    {% else %}
+    {{ _('project.font_none') }}
+    {% endif %}
+  </p>
+  <form
+    method="post"
+    action="/projects/{{ project.id | urlquote }}/ui/font"
+    enctype="multipart/form-data"
+    class="font-upload-form"
+  >
+    <label class="font-upload-label" for="font-file">
+      {{ _('project.font_label') }}
+    </label>
+    <div class="font-upload-row">
+      <input
+        type="file"
+        name="file"
+        id="font-file"
+        accept=".ttf,.otf,font/ttf,font/otf,application/x-font-ttf,application/vnd.ms-opentype"
+        required
+      >
+      <button type="submit">{{ _('project.font_save') }}</button>
+    </div>
+    <p class="field-hint">{{ _('project.font_hint') }}</p>
+  </form>
+</section>
+
+<section class="card" aria-labelledby="pipeline-title">
+  <h2 id="pipeline-title">{{ _('project.pipeline_title') }}</h2>
+  <p class="section-lead">
+    {{ _('project.pipeline_lead') }}
+  </p>
+  {% if ui_developer_mode %}
+  <p class="section-lead">{{ _('project.worker') }} <code>python worker.py</code></p>
+  {% endif %}
+  {% if job_error %}
+  <div class="banner error" role="alert">{{ job_error }}</div>
+  {% endif %}
+  <script type="application/json" id="job-defaults-data">{{ job_defaults | tojson }}</script>
+  <form
+    id="job-form"
+    method="post"
+    action="/projects/{{ project.id | urlquote }}/ui/jobs"
+    class="job-form"
+    data-ui-dev-available="{{ 'true' if ui_developer_mode else 'false' }}"
+  >
+    {% if ui_developer_mode %}
+    <div class="form-toolbar">
+      <div class="opt-field form-toolbar-kind">
+        <label for="job-kind">{{ _('project.job_kind') }}</label>
+        <select name="kind" id="job-kind">
+          <option value="full">{{ _('project.kind_full') }}</option>
+          <option value="extract">{{ _('project.kind_extract') }}</option>
+          <option value="translate">{{ _('project.kind_translate') }}</option>
+          <option value="render">{{ _('project.kind_render') }}</option>
+        </select>
+      </div>
+      <div
+        class="mode-switch"
+        id="ui-mode-switch"
+        role="group"
+        aria-label="{{ _('project.mode_aria') }}"
+      >
+        <button type="button" data-mode="user" class="is-active">{{ _('project.mode_user') }}</button>
+        <button type="button" data-mode="dev">{{ _('project.mode_dev') }}</button>
+      </div>
+    </div>
+    {% else %}
+    <input type="hidden" name="kind" id="job-kind" value="full">
+    {% endif %}
+
+    <div class="lang-block" id="opt-field-target-lang">
+      <p class="lang-auto">
+        {{ _('project.src_lang') }} <strong>{{ _('project.src_auto') }}</strong>
+      </p>
+      <div class="opt-field">
+        <label for="target_lang">
+          {{ _('project.target_lang') }}
+          <span class="cli-hint">(--target-lang)</span>
+        </label>
+        <select name="target_lang" id="target_lang">
+          {% for lang in target_languages %}
+          <option value="{{ lang.code }}" {% if lang.code == job_defaults.target_lang %}selected{% endif %}>{{ lang.label }} ({{ lang.code }})</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    {% if ui_developer_mode %}
+    <div class="opt-group" id="opt-group-extract" role="group" aria-labelledby="opt-label-extract">
+      <h3 class="opt-group-title" id="opt-label-extract">{{ _('project.group_extract') }}</h3>
+      <label class="check-row opt-row" id="opt-row-skip-extract">
+        <input type="hidden" name="skip_extract" value="0">
+        <input type="checkbox" name="skip_extract" id="skip_extract" value="1">
+        <span>
+          {{ _('project.skip_extract') }}
+          <span class="cli-hint">(--skip-extract, _clean)</span>
+        </span>
+      </label>
+      <details class="opt-advanced" id="opt-advanced-extract">
+        <summary>{{ _('project.advanced') }}</summary>
+        <div class="opt-advanced-body">
+          <label class="check-row opt-row" id="opt-row-prep-manual">
+            <input type="hidden" name="prep_manual" value="0">
+            <input type="checkbox" name="prep_manual" id="prep_manual" value="1">
+            <span>
+              {{ _('project.prep_manual') }}
+              <span class="cli-hint">(--prep-manual)</span>
+            </span>
+          </label>
+          <div class="opt-field" id="opt-field-mit-repo">
+            <label for="mit_repo">
+              {{ _('project.mit_repo') }}
+              <span class="cli-hint">(--mit-repo)</span>
+            </label>
+            <input
+              type="text"
+              name="mit_repo"
+              id="mit_repo"
+              value="{{ job_defaults.mit_repo }}"
+              placeholder="{{ _('project.mit_placeholder') }}"
+            >
+            <p class="field-hint">{{ _('project.mit_hint') }}</p>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="opt-group" id="opt-group-translate" role="group" aria-labelledby="opt-label-translate">
+      <h3 class="opt-group-title" id="opt-label-translate">{{ _('project.group_translate') }}</h3>
+      <label class="check-row opt-row" id="opt-row-use-existing">
+        <input type="hidden" name="use_existing_translations" value="0">
+        <input type="checkbox" name="use_existing_translations" id="use_existing_translations" value="1">
+        <span>
+          {{ _('project.use_existing') }}
+          <span class="cli-hint">(--translations-in, translations.json)</span>
+        </span>
+      </label>
+      <div class="opt-field" id="opt-field-model">
+        <label for="model">
+          {{ _('project.model') }}
+          <span class="cli-hint">(--model)</span>
+        </label>
+        <input
+          type="text"
+          name="model"
+          id="model"
+          value="{{ job_defaults.model }}"
+          placeholder="{{ _('project.model_placeholder') }}"
+        >
+      </div>
+      <details class="opt-advanced" id="opt-advanced-translate">
+        <summary>{{ _('project.advanced') }}</summary>
+        <div class="opt-advanced-body">
+          <label class="check-row opt-row" id="opt-row-save-translations">
+            <input type="hidden" name="save_translations" value="0">
+            <input type="checkbox" name="save_translations" id="save_translations" value="1" checked>
+            <span>
+              {{ _('project.save_translations') }}
+              <span class="cli-hint">(--translations-out, translations.json)</span>
+            </span>
+          </label>
+          <div class="opt-field" id="opt-field-pages-per-batch">
+            <label for="pages_per_batch">
+              {{ _('project.pages_per_batch') }}
+              <span class="cli-hint">(--pages-per-batch)</span>
+            </label>
+            <input
+              type="number"
+              name="pages_per_batch"
+              id="pages_per_batch"
+              min="0"
+              step="1"
+              value="{{ job_defaults.pages_per_batch }}"
+            >
+            <p class="field-hint">{{ _('project.pages_hint_0') }}</p>
+          </div>
+          <label class="check-row opt-row" id="opt-row-strict">
+            <input type="hidden" name="strict" value="0">
+            <input type="checkbox" name="strict" id="strict" value="1">
+            <span>
+              {{ _('project.strict') }}
+              <span class="cli-hint">(--strict)</span>
+            </span>
+          </label>
+        </div>
+      </details>
+    </div>
+
+    <div class="opt-group" id="opt-group-render" role="group" aria-labelledby="opt-label-render">
+      <h3 class="opt-group-title" id="opt-label-render">{{ _('project.group_render') }}</h3>
+      <div class="opt-grid-2">
+        <div class="opt-field">
+          <label for="font_path">
+            {{ _('project.font_path') }}
+            <span class="cli-hint">(--font)</span>
+          </label>
+          <input
+            type="text"
+            name="font_path"
+            id="font_path"
+            value="{{ job_defaults.font_path }}"
+            placeholder="{{ _('project.font_path_placeholder') }}"
+          >
+          <p class="field-hint">{{ _('project.font_path_hint') }}</p>
+        </div>
+        <div class="opt-field">
+          <label for="font_scale">
+            {{ _('project.font_scale') }}
+            <span class="cli-hint">(--font-scale)</span>
+          </label>
+          <input
+            type="number"
+            name="font_scale"
+            id="font_scale"
+            min="0.1"
+            step="0.05"
+            value="{{ job_defaults.font_scale }}"
+          >
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="opt-user-options">
+      <label class="check-row opt-row" id="opt-row-skip-extract">
+        <input type="hidden" name="skip_extract" value="0">
+        <input type="checkbox" name="skip_extract" id="skip_extract" value="1">
+        <span>{{ _('project.skip_extract') }}</span>
+      </label>
+      <label class="check-row opt-row" id="opt-row-use-existing">
+        <input type="hidden" name="use_existing_translations" value="0">
+        <input type="checkbox" name="use_existing_translations" id="use_existing_translations" value="1">
+        <span>{{ _('project.use_existing') }}</span>
+      </label>
+      <details class="opt-advanced" id="opt-user-advanced">
+        <summary>{{ _('project.advanced') }}</summary>
+        <div class="opt-advanced-body">
+          <label class="check-row opt-row" id="opt-row-save-translations">
+            <input type="hidden" name="save_translations" value="0">
+            <input type="checkbox" name="save_translations" id="save_translations" value="1" checked>
+            <span>{{ _('project.save_translations') }}</span>
+          </label>
+          <div class="opt-field" id="opt-field-pages-per-batch">
+            <label for="pages_per_batch">{{ _('project.pages_per_batch') }}</label>
+            <input
+              type="number"
+              name="pages_per_batch"
+              id="pages_per_batch"
+              min="0"
+              step="1"
+              value="{{ job_defaults.pages_per_batch }}"
+            >
+            <p class="field-hint">{{ _('project.pages_hint_user') }}</p>
+          </div>
+          <div class="opt-field">
+            <label for="font_scale">{{ _('project.font_scale') }}</label>
+            <input
+              type="number"
+              name="font_scale"
+              id="font_scale"
+              min="0.1"
+              step="0.05"
+              value="{{ job_defaults.font_scale }}"
+            >
+          </div>
+          <label class="check-row opt-row" id="opt-row-strict">
+            <input type="hidden" name="strict" value="0">
+            <input type="checkbox" name="strict" id="strict" value="1">
+            <span>{{ _('project.strict') }}</span>
+          </label>
+        </div>
+      </details>
+    </div>
+    {% endif %}
+
+    <div class="form-actions">
+      <button type="submit" class="primary">{{ _('project.run') }}</button>
+      {% if ui_developer_mode %}
+      <button type="button" id="job-reset-defaults">{{ _('project.reset') }}</button>
+      {% endif %}
+    </div>
+  </form>
+</section>
+
+<div
+  id="live-panel"
+  hx-get="/projects/{{ project_id | urlquote }}/ui/live"
+  hx-trigger="load"
+  hx-swap="innerHTML"
+>
+  {% include "partials/live.html" %}
+</div>
+
+<section class="card danger-zone" aria-labelledby="danger-title">
+  <h2 id="danger-title">{{ _('project.danger_title') }}</h2>
+  <p class="section-lead">{{ _('project.danger_lead') }}</p>
+  <form
+    method="post"
+    action="/projects/{{ project.id | urlquote }}/ui/delete"
+    data-confirm="{{ _('projects.confirm_delete', name=project.name) }}"
+  >
+    <button type="submit" class="danger">{{ _('project.delete') }}</button>
+  </form>
+</section>
+{% endblock %}

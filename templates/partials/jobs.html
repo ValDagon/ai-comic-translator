@@ -1,0 +1,18 @@
+{% if not jobs %}
+<p class="muted">{{ _('live.jobs_empty') }}</p>
+{% else %}
+<ul class="job-list">
+  {% for j in jobs %}
+  <li class="job-item status-{{ j.status }}">
+    <div class="job-head">
+      <span class="job-kind">{{ kind_label(j.kind) }}</span>
+      <span class="badge">{{ status_label(j.status) }}</span>
+    </div>
+    {% if j.status == 'failed' and j.error %}
+    <p class="err">{{ j.error }}</p>
+    {% endif %}
+    <p class="job-log">{{ format_user_log(j) }}</p>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}

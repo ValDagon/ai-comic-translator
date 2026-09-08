@@ -1,0 +1,21 @@
+{% extends "base_landing.html" %}
+{% block title %}{{ _('pricing.title') }}{% endblock %}
+{% block content %}
+<main class="landing-wrap">
+  <section class="landing-section pricing-stub" aria-labelledby="pricing-title">
+    <p class="chip">{{ _('pricing.chip') }}</p>
+    <h2 id="pricing-title">{{ _('pricing.heading') }}</h2>
+    <p class="section-lead">
+      {{ _('pricing.lead') }}
+    </p>
+    <div class="hero-cta">
+      {% if user %}
+      <a class="button primary" href="/app">{{ _('nav.to_projects') }}</a>
+      {% else %}
+      <a class="button primary" href="/#register">{{ _('landing.create_account') }}</a>
+      <a class="button ghost" href="/login?next=/app">{{ _('nav.login') }}</a>
+      {% endif %}
+    </div>
+  </section>
+</main>
+{% endblock %}

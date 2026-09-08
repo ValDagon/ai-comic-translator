@@ -1,0 +1,56 @@
+{% extends "base_app.html" %}
+{% block title %}{{ _('projects.title') }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>{{ _('projects.heading') }}</h1>
+  <p class="page-sub">{{ _('projects.sub') }}</p>
+</header>
+
+{% if not projects %}
+<section class="card" aria-labelledby="empty-title">
+  <h2 id="empty-title">{{ _('projects.empty_title') }}</h2>
+  <p class="muted">{{ _('projects.empty_body') }}</p>
+</section>
+{% endif %}
+
+<ul class="project-grid">
+  {% for card in project_cards %}
+  <li class="project-card">
+    <div class="project-card-cover">
+      <span class="project-status is-{{ card.status_key }}">{{ card.status_label }}</span>
+    </div>
+    <div class="project-card-body">
+      <h2><a href="/projects/{{ card.project.id | urlquote }}/ui">{{ card.project.name }}</a></h2>
+      <p class="project-meta">
+        {{ _('projects.meta', input=card.input_count, out=card.out_count, when=card.project.created_at | format_when) }}
+      </p>
+      <div class="project-card-actions">
+        <a class="button ghost small" href="/projects/{{ card.project.id | urlquote }}/ui">{{ _('common.open') }}</a>
+        <form
+          method="post"
+          action="/projects/{{ card.project.id | urlquote }}/ui/delete"
+          class="inline-form"
+          data-confirm="{{ _('projects.confirm_delete', name=card.project.name) }}"
+        >
+          <button type="submit" class="danger small">{{ _('common.delete') }}</button>
+        </form>
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+
+  <li>
+    <form method="post" action="/ui/projects" class="project-card project-card-new">
+      <button type="submit" class="project-card-new-btn">
+        <span class="plus" aria-hidden="true">+</span>
+        <strong>{{ _('projects.start') }}</strong>
+        <span>{{ _('projects.start_hint') }}</span>
+      </button>
+    </form>
+  </li>
+</ul>
+
+{% if ui_developer_mode %}
+<p class="muted foot">JSON API: <a href="/docs">/docs</a> · <code>python worker.py</code></p>
+{% endif %}
+{% endblock %}

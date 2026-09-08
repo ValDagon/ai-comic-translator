@@ -1,0 +1,9 @@
+# Локальные секреты — скопируйте в config.local.toml (файл в .gitignore).
+#   cp config.local.toml.example config.local.toml
+#
+# Либо задайте ключ через окружение / .env:
+#   export OPENROUTER_API_KEY=sk-or-...
+
+[openrouter]
+# Ключ: https://openrouter.ai/keys
+api_key = "sk-or-..."

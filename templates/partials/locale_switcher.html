@@ -1,0 +1,9 @@
+<form class="locale-switcher" method="post" action="/locale" aria-label="{{ _('locale.aria') }}">
+  <input type="hidden" name="next" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}">
+  <label class="locale-switcher-label" for="locale-select">{{ _('locale.label') }}</label>
+  <select name="lang" id="locale-select" onchange="this.form.requestSubmit()">
+    {% for item in locale_choices %}
+    <option value="{{ item.code }}" {% if item.code == locale %}selected{% endif %}>{{ item.label }}</option>
+    {% endfor %}
+  </select>
+</form>

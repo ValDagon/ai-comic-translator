@@ -1,0 +1,239 @@
+{% extends "base_landing.html" %}
+{% block title %}{{ _('landing.title') }}{% endblock %}
+{% block content %}
+<main class="landing-wrap">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <p class="chip">{{ _('landing.chip') }}</p>
+      <h1 class="hero-title" id="hero-title">
+        {{ _('landing.hero_l1') }}<br>
+        {{ _('landing.hero_l2') }}<br>
+        <span class="accent">{{ _('landing.hero_l3') }}</span>
+      </h1>
+      <p class="hero-lead">
+        {{ _('landing.lead') }}
+      </p>
+      {% if user %}
+      <div class="hero-cta">
+        <a class="button primary" href="/app">{{ _('nav.to_projects') }}</a>
+      </div>
+      {% else %}
+      <div class="hero-cta">
+        <a class="button primary" href="#register">{{ _('landing.cta_start') }}</a>
+        <a class="button ghost" href="/login?next=/app">{{ _('landing.cta_login') }}</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-frame">
+        <img
+          src="/static/brand/hero.png"
+          alt="{{ _('landing.hero_alt') }}"
+          width="1376"
+          height="768"
+        >
+      </div>
+      <span class="hero-tag">{{ _('landing.hero_tag') }}</span>
+      <p class="hero-caption">{{ _('landing.hero_caption') }}</p>
+    </div>
+  </section>
+
+  {% if not user %}
+  <section class="landing-section" id="register" aria-labelledby="register-title">
+    <div class="register-split">
+      <div>
+        <h2 id="register-title">{{ _('landing.register_title') }}</h2>
+        <p class="section-lead">
+          {{ _('landing.register_lead') }}
+        </p>
+      </div>
+      <div class="card register-card">
+        {% if register_error %}
+        <p class="flash bad">{{ register_error }}</p>
+        {% endif %}
+        {% if allow_register and (google_enabled or apple_enabled) %}
+        <div class="oauth-stack">
+          {% if google_enabled %}
+          <a class="button oauth google" href="/auth/google?next=/app">{{ _('auth.continue_google') }}</a>
+          {% endif %}
+          {% if apple_enabled %}
+          <a class="button oauth apple" href="/auth/apple?next=/app">{{ _('auth.continue_apple') }}</a>
+          {% endif %}
+        </div>
+        {% elif not allow_register %}
+        <p class="flash bad">{{ register_error or _('landing.register_closed') }}</p>
+        {% else %}
+        <p class="flash bad">{{ _('err.oauth_unconfigured') }}</p>
+        {% endif %}
+        <p class="hint">{{ _('landing.have_account') }} <a href="/login?next=/app">{{ _('nav.login') }}</a></p>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="landing-section" id="difference" aria-labelledby="diff-title">
+    <div class="difference-panel">
+      <h2 id="diff-title">{{ _('landing.diff_title') }}</h2>
+      <p class="section-lead">
+        {{ _('landing.diff_lead') }}
+      </p>
+      <ul class="diff-cards">
+        <li>
+          <span class="diff-icon red" aria-hidden="true">01</span>
+          <strong>{{ _('landing.diff1_title') }}</strong>
+          <span>{{ _('landing.diff1_body') }}</span>
+        </li>
+        <li>
+          <span class="diff-icon cyan" aria-hidden="true">02</span>
+          <strong>{{ _('landing.diff2_title') }}</strong>
+          <span>{{ _('landing.diff2_body') }}</span>
+        </li>
+        <li>
+          <span class="diff-icon ink" aria-hidden="true">03</span>
+          <strong>{{ _('landing.diff3_title') }}</strong>
+          <span>{{ _('landing.diff3_body') }}</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="landing-section" id="how" aria-labelledby="how-title">
+    <h2 class="pipeline-title" id="how-title">{{ _('landing.how_title') }}</h2>
+    <p class="section-lead pipeline-lead">
+      {{ _('landing.how_lead') }}
+    </p>
+    <ol class="steps">
+      <li>
+        <strong>{{ _('landing.step1_title') }}</strong>
+        <span>{{ _('landing.step1_body') }}</span>
+      </li>
+      <li>
+        <strong>{{ _('landing.step2_title') }}</strong>
+        <span>{{ _('landing.step2_body') }}</span>
+      </li>
+      <li>
+        <strong>{{ _('landing.step3_title') }}</strong>
+        <span>{{ _('landing.step3_body') }}</span>
+      </li>
+      <li class="step-final">
+        <strong>{{ _('landing.step4_title') }}</strong>
+        <span>{{ _('landing.step4_body') }}</span>
+      </li>
+    </ol>
+  </section>
+
+  <section class="landing-section" id="compare" aria-labelledby="compare-title">
+    <h2 id="compare-title">{{ _('landing.compare_title') }}</h2>
+    <p class="section-lead">{{ _('landing.compare_lead') }}</p>
+    <div class="compare-table-wrap">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ _('landing.compare_col_feature') }}</th>
+            <th scope="col">{{ _('landing.compare_col_us') }}</th>
+            <th scope="col">{{ _('landing.compare_col_page') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">{{ _('landing.compare_row1') }}</th>
+            <td>{{ _('landing.compare_us1') }}</td>
+            <td>{{ _('landing.compare_page1') }}</td>
+          </tr>
+          <tr>
+            <th scope="row">{{ _('landing.compare_row2') }}</th>
+            <td>{{ _('landing.compare_us2') }}</td>
+            <td>{{ _('landing.compare_page2') }}</td>
+          </tr>
+          <tr>
+            <th scope="row">{{ _('landing.compare_row3') }}</th>
+            <td>{{ _('landing.compare_us3') }}</td>
+            <td>{{ _('landing.compare_page3') }}</td>
+          </tr>
+          <tr>
+            <th scope="row">{{ _('landing.compare_row4') }}</th>
+            <td>{{ _('landing.compare_us4') }}</td>
+            <td>{{ _('landing.compare_page4') }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="landing-section" id="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title">{{ _('landing.faq_title') }}</h2>
+    <dl class="faq-list">
+      <div>
+        <dt>{{ _('landing.faq1_q') }}</dt>
+        <dd>{{ _('landing.faq1_a') }}</dd>
+      </div>
+      <div>
+        <dt>{{ _('landing.faq2_q') }}</dt>
+        <dd>{{ _('landing.faq2_a') }}</dd>
+      </div>
+      <div>
+        <dt>{{ _('landing.faq3_q') }}</dt>
+        <dd>{{ _('landing.faq3_a') }}</dd>
+      </div>
+      <div>
+        <dt>{{ _('landing.faq4_q') }}</dt>
+        <dd>{{ _('landing.faq4_a') }}</dd>
+      </div>
+      <div>
+        <dt>{{ _('landing.faq5_q') }}</dt>
+        <dd>{{ _('landing.faq5_a') }}</dd>
+      </div>
+      <div>
+        <dt>{{ _('landing.faq6_q') }}</dt>
+        <dd>{{ _('landing.faq6_a', days=retention_days) }}</dd>
+      </div>
+      <div>
+        <dt>{{ _('landing.faq7_q') }}</dt>
+        <dd>{{ _('landing.faq7_a') }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="landing-section privacy-block" aria-labelledby="privacy-title">
+    <div class="privacy-panel">
+      <h2 id="privacy-title">{{ _('landing.privacy_title') }}</h2>
+      <p class="section-lead">{{ _('landing.privacy_lead', days=retention_days) }}</p>
+    </div>
+  </section>
+
+  <section class="landing-section" aria-labelledby="closing-title">
+    <div class="closing">
+      {% if user %}
+      <h2 id="closing-title">{{ _('landing.closing_user_title') }}</h2>
+      <p class="section-lead">{{ _('landing.closing_user_lead') }}</p>
+      <div class="hero-cta">
+        <a class="button ink" href="/app">{{ _('landing.open_projects') }}</a>
+      </div>
+      {% else %}
+      <h2 id="closing-title">{{ _('landing.closing_guest_title') }}</h2>
+      <p class="section-lead">{{ _('landing.closing_guest_lead') }}</p>
+      <div class="hero-cta">
+        <a class="button ink" href="#register">{{ _('landing.first_project') }}</a>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <footer class="landing-footer">
+    <a href="/" class="brand-footer">
+      <img src="/static/brand/logo.png" alt="" width="32" height="32">
+      AI Comic Translator
+    </a>
+    <div class="landing-footer-links">
+      <a href="/pricing">{{ _('nav.pricing') }}</a>
+      {% if user %}
+      <a href="/app">{{ _('nav.projects') }}</a>
+      {% else %}
+      <a href="/login?next=/app">{{ _('nav.login') }}</a>
+      <a href="#register">{{ _('landing.footer_register') }}</a>
+      {% endif %}
+    </div>
+  </footer>
+</main>
+{% endblock %}

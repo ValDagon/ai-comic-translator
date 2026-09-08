@@ -1,0 +1,99 @@
+<section class="stats" aria-label="{{ _('live.stats_aria') }}">
+  <div class="stat-pill">
+    <span class="label">{{ _('live.uploaded') }}</span>
+    <strong id="stat-input">{{ input_count }}</strong>
+  </div>
+  <div class="stat-pill">
+    <span class="label">{{ _('live.done') }}</span>
+    <strong id="stat-out">{{ out_count }}</strong>
+  </div>
+  <div class="stat-pill">
+    <span class="label">{{ _('live.translation') }}</span>
+    <strong>{% if has_translations %}{{ _('live.translation_ready') }}{% else %}<span class="muted">{{ _('live.translation_none') }}</span>{% endif %}</strong>
+  </div>
+  {% if poll_fast %}
+  <div class="stat-pill">
+    <span class="label">{{ _('live.status') }}</span>
+    <strong><span class="live-dot" title="{{ _('live.live_title') }}">● live</span></strong>
+  </div>
+  {% endif %}
+</section>
+
+{% if out_count > 0 %}
+<section class="card" aria-labelledby="result-title">
+  <h2 id="result-title">{{ _('live.result') }}</h2>
+  {% if preview_pages %}
+  <div class="page-preview-grid" aria-label="{{ _('live.preview_aria') }}">
+    {% for page in preview_pages %}
+    <a
+      class="page-preview-thumb"
+      href="/projects/{{ project_id | urlquote }}/out/{{ page | urlquote }}"
+      target="_blank"
+      rel="noopener"
+      title="{{ page }}"
+    >
+      <img
+        src="/projects/{{ project_id | urlquote }}/out/{{ page | urlquote }}"
+        alt="{{ _('live.preview_alt', name=page) }}"
+        loading="lazy"
+        width="120"
+        height="160"
+      >
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div class="result-row">
+    <a class="button link primary" href="/projects/{{ project_id | urlquote }}/download">{{ _('live.download_zip', count=out_count) }}</a>
+    {% if has_translations %}
+    <a class="button link" href="/projects/{{ project_id | urlquote }}/download/translations">{{ _('live.download_translations') }}</a>
+    {% endif %}
+  </div>
+</section>
+{% else %}
+<section class="card" aria-labelledby="result-title">
+  <h2 id="result-title">{{ _('live.result') }}</h2>
+  <p class="muted">{{ _('live.result_empty') }}</p>
+</section>
+{% endif %}
+
+<section class="card compact" aria-labelledby="jobs-title">
+  <h2 id="jobs-title">{{ _('live.jobs_title') }}</h2>
+  {% if jobs %}
+  <div
+    class="job-progress state-{{ progress.state }}"
+    role="progressbar"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    aria-valuenow="{{ progress.percent }}"
+    aria-label="{{ _('live.progress_aria') }}"
+  >
+    <div class="job-progress-meta">
+      <span class="job-progress-label">{{ _('live.progress_label') }}</span>
+      <span class="job-progress-value">
+        {% if progress.page_current is not none and progress.page_total %}
+        {{ _('live.page_progress', current=progress.page_current, total=progress.page_total) }}
+        ·
+        {% endif %}
+        {{ progress.percent }}%
+      </span>
+    </div>
+    <div class="job-progress-track">
+      <div
+        class="job-progress-fill{% if progress.percent >= 95 and progress.state != 'failed' %} near-done{% endif %}"
+        style="width: {{ progress.percent }}%"
+      ></div>
+    </div>
+  </div>
+  {% endif %}
+  {% include "partials/jobs.html" %}
+</section>
+
+<script>
+  (function () {
+    var panel = document.getElementById("live-panel");
+    if (!panel) return;
+    var fast = {{ "true" if poll_fast else "false" }};
+    panel.setAttribute("hx-trigger", fast ? "load, every 1s" : "load, every 2s");
+  })();
+</script>

@@ -1,0 +1,17 @@
+# Используется run_extract.py (JSON для manga-image-translator).
+# Английский комикс + target_lang ENG по умолчанию в MIT → весь OCR-текст
+# выкидывается как «уже целевой язык». no_text_lang_skip = true это отключает.
+#
+# translator=original (не none): в batch-режиме MIT (batch_size>=2) пустые
+# translation от none фильтруются как «blank», text_regions обнуляются,
+# dump текста не пишется и инпейнт не запускается.
+# original оставляет OCR-текст в region.translation; renderer=none всё равно
+# не рисует его обратно — получаем чистые страницы + дамп для extract_parse.
+# Не используем CLI --save-text: он делает exit(-1) после перевода (см. run_extract).
+[translator]
+translator = "original"
+target_lang = "RUS"
+no_text_lang_skip = true
+
+[render]
+renderer = "none"

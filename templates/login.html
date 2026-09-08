@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ _('login.title') }}{% endblock %}
+{% block content %}
+<section class="page-head">
+  <h1>{{ _('login.heading') }}</h1>
+  <p class="page-sub">{{ _('login.sub') }}</p>
+</section>
+
+<div class="card auth-card">
+  {% if error %}
+  <p class="flash bad">{{ error }}</p>
+  {% endif %}
+  {% if google_enabled or apple_enabled %}
+  <div class="oauth-stack">
+    {% if google_enabled %}
+    <a class="button oauth google" href="/auth/google?next={{ next|urlquote }}">{{ _('auth.continue_google') }}</a>
+    {% endif %}
+    {% if apple_enabled %}
+    <a class="button oauth apple" href="/auth/apple?next={{ next|urlquote }}">{{ _('auth.continue_apple') }}</a>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="flash bad">{{ _('err.oauth_unconfigured') }}</p>
+  {% endif %}
+  {% if not allow_register %}
+  <p class="hint">{{ _('landing.register_closed') }}</p>
+  {% endif %}
+</div>
+{% endblock %}
